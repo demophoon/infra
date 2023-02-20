@@ -1,0 +1,2 @@
+*.tfstate
+terraform/proxmox_vm/rendered/*.cfg
