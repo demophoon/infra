@@ -1,32 +1,38 @@
 provider "proxmox" {
-  pm_api_url = "https://${var.proxmox_host}:8006/api2/json"
-  pm_user = var.proxmox_user
-  pm_password = var.proxmox_password
   pm_tls_insecure = true
 }
 
-module "vm-beryllium" {
-  count = 1
-  source = "./proxmox_vm"
+module "vm-proxmox" {
+  for_each = {
+    proxmox = {
+      name = "proxmox"
+      host = "192.168.1.4"
+      cpu = 8
+      memory = 16384
+    }
+    nuc = {
+      name = "nuc"
+      host = "192.168.1.35"
+      cpu = 4
+      memory = 8192
+    }
+    nuc-b = {
+      name = "nuc"
+      host = "192.168.1.35"
+      cpu = 4
+      memory = 8192
+    }
+  }
 
-  proxmox_node_name = "proxmox"
-  proxmox_host = "192.168.1.4"
-  proxmox_user = var.proxmox_user
-  proxmox_password = var.proxmox_password
+  source = "./proxmox_vm"
+  proxmox_node_name = each.value.name
+  proxmox_host = each.value.host
+
+  cpu = each.value.cpu
+  memory = each.value.memory
   proxmox_ssh_user = var.proxmox_ssh_user
   proxmox_ssh_password = var.proxmox_ssh_password
-  template_name = var.template_name
-}
+  template_name = var.proxmox_template_name
 
-module "vm-nuc" {
-  count = 1
-  source = "./proxmox_vm"
-
-  proxmox_node_name = "nuc"
-  proxmox_host = "192.168.1.35"
-  proxmox_user = var.proxmox_user
-  proxmox_password = var.proxmox_password
-  proxmox_ssh_user = var.proxmox_ssh_user
-  proxmox_ssh_password = var.proxmox_ssh_password
-  template_name = var.template_name
+  tailscale_tailnet_name = var.tailscale_tailnet_name
 }

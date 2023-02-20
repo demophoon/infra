@@ -1,0 +1,20 @@
+Include /etc/ssh/sshd_config.d/*.conf
+
+Port 22
+Protocol 2
+
+PrintMotd no
+
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+X11Forwarding no
+GatewayPorts no
+
+UsePAM yes
+PermitEmptyPasswords no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+MaxAuthTries 3
+
+TrustedUserCAKeys /etc/ssh/ca.pem

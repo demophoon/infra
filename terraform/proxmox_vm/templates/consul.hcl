@@ -3,7 +3,7 @@ client_addr = "127.0.0.1 {{ GetInterfaceIP \"docker0\" }} {{ GetInterfaceIP \"en
 bind_addr = "{{ GetInterfaceIP \"tailscale0\" }}"
 
 retry_join = [
-  "100.82.113.104", # Strato
+  "100.90.162.18",  # TrueNAS
   "100.76.155.95",  # Mecca
   "100.94.10.66",   # Doyle
 ]

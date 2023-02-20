@@ -19,28 +19,31 @@ resource "random_integer" "vrrp_priority" {
 data "template_file" "user_data" {
   template = file("${path.module}/templates/user_data.cfg")
   vars = {
-    hostname = random_pet.server_name.id
-    ts_key = tailscale_tailnet_key.ts_key.key
-    nomad_config = base64encode(data.template_file.nomad_config.rendered)
-    consul_config = base64encode(data.template_file.consul_config.rendered)
-    vault_config = base64encode(data.template_file.vault_config.rendered)
+    hostname          = random_pet.server_name.id
+    ts_key            = tailscale_tailnet_key.ts_key.key
+    ssh_ca            = base64encode(file("${path.module}/templates/ssh_ca.pem"))
+    sshd_config       = base64encode(file("${path.module}/templates/sshd_config"))
+    docker_config     = base64encode(data.template_file.docker_config.rendered)
+    nomad_config      = base64encode(data.template_file.nomad_config.rendered)
+    consul_config     = base64encode(data.template_file.consul_config.rendered)
+    vault_config      = base64encode(data.template_file.vault_config.rendered)
     keepalived_config = base64encode(data.template_file.keepalived_config.rendered)
-    vault_pki_cert = base64encode(vault_pki_secret_backend_cert.vault_internal.certificate)
-    vault_pki_key = base64encode(vault_pki_secret_backend_cert.vault_internal.private_key)
+    vault_pki_cert    = base64encode(vault_pki_secret_backend_cert.vault_internal.certificate)
+    vault_pki_key     = base64encode(vault_pki_secret_backend_cert.vault_internal.private_key)
   }
 }
 
 resource "local_file" "cloud_init_user_data_file" {
+  lifecycle {
+    ignore_changes = [
+      content,
+    ]
+  }
   content = data.template_file.user_data.rendered
   filename = "${path.module}/rendered/${random_pet.server_name.id}-user_data.cfg"
 }
 
 resource "null_resource" "cloud_init_config_files" {
-  lifecycle {
-    replace_triggered_by = [
-      local_file.cloud_init_user_data_file,
-    ]
-  }
   connection {
     type     = "ssh"
     user     = "${var.proxmox_ssh_user}"
@@ -60,12 +63,10 @@ resource "proxmox_vm_qemu" "vm" {
     null_resource.cloud_init_config_files,
   ]
   lifecycle {
-    replace_triggered_by = [
-      local_file.cloud_init_user_data_file,
-    ]
     ignore_changes = [
       disk,
       desc,
+      clone,
     ]
   }
 
@@ -76,9 +77,9 @@ resource "proxmox_vm_qemu" "vm" {
 
   agent = 1
 
-  cores = 8
+  cores = var.cpu
   sockets = 1
-  memory = 16384
+  memory = var.memory
 
   network {
     bridge = "vmbr0"

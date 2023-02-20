@@ -107,7 +107,11 @@ client {
   host_volume "lidarr-config"       { path = "/mnt/nfs/arr/lidarr" }
   host_volume "sonarr-config"       { path = "/mnt/nfs/arr/sonarr" }
   host_volume "radarr-config"       { path = "/mnt/nfs/arr/radarr" }
-  host_volume "overseerr-config"     { path = "/mnt/nfs/arr/overseerr" }
+  host_volume "overseerr-config"    { path = "/mnt/nfs/arr/overseerr" }
+
+  # Valheim
+  host_volume "valheim-config" { path = "/mnt/nfs/valheim/config" }
+  host_volume "valheim-data" { path = "/mnt/nfs/valheim/data" }
 }
 
 consul {
@@ -130,6 +134,9 @@ telemetry {
 plugin "docker" {
   config {
     pull_activity_timeout = "10m"
+    auth {
+      config = "/root/.docker/config.json"
+    }
     allow_privileged = true
     allow_caps = ["all"]
     volumes {

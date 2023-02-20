@@ -40,5 +40,9 @@ terraform {
       source = "oracle/oci"
       version = "4.105.0"
     }
+    unifi = {
+      source = "paultyng/unifi"
+      version = "0.39.0"
+    }
   }
 }

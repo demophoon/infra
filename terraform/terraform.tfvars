@@ -1,2 +1,1 @@
-do_vm_count = 0
-template_name = "ubuntu-2204-base-20230116-2119"
+proxmox_template_name = "ubuntu-2204-base-20230219-0300"

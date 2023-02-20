@@ -7,6 +7,10 @@ data "template_file" "nomad_config" {
   }
 }
 
+data "template_file" "docker_config" {
+  template = file("${path.module}/templates/docker.json")
+}
+
 data "template_file" "consul_config" {
   template = file("${path.module}/templates/consul.hcl")
 }
@@ -30,6 +34,7 @@ resource "vault_token" "nomad_token" {
   no_parent = true
 }
 
+// Generate Vault Certificate
 resource "vault_pki_secret_backend_cert" "vault_internal" {
   backend = "pki"
   name = "backplane"
@@ -40,4 +45,3 @@ resource "vault_pki_secret_backend_cert" "vault_internal" {
     "standby.vault.service.consul.demophoon.com",
   ]
 }
-
