@@ -12,6 +12,7 @@ X11Forwarding no
 GatewayPorts no
 
 UsePAM yes
+PubkeyAuthentication yes
 PermitEmptyPasswords no
 PasswordAuthentication no
 KbdInteractiveAuthentication no

@@ -26,6 +26,10 @@ data "template_file" "keepalived_config" {
   }
 }
 
+data "template_file" "sshd_config" {
+  template = file("${path.module}/templates/sshd_config")
+}
+
 // Required tokens and certs
 // TODO: Generate certificates for Nomad and Consul
 resource "vault_token" "nomad_token" {

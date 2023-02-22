@@ -21,8 +21,8 @@ data "template_file" "user_data" {
   vars = {
     hostname          = random_pet.server_name.id
     ts_key            = tailscale_tailnet_key.ts_key.key
-    ssh_ca            = base64encode(file("${path.module}/templates/ssh_ca.pem"))
-    sshd_config       = base64encode(file("${path.module}/templates/sshd_config"))
+    ssh_ca            = base64encode(data.vault_kv_secret.ssh_ca.data.public_key)
+    sshd_config       = base64encode(data.template_file.sshd_config.rendered)
     docker_config     = base64encode(data.template_file.docker_config.rendered)
     nomad_config      = base64encode(data.template_file.nomad_config.rendered)
     consul_config     = base64encode(data.template_file.consul_config.rendered)
@@ -33,12 +33,11 @@ data "template_file" "user_data" {
   }
 }
 
+data "vault_kv_secret" "ssh_ca" {
+  path = "proxmox/config/ca"
+}
+
 resource "local_file" "cloud_init_user_data_file" {
-  lifecycle {
-    ignore_changes = [
-      content,
-    ]
-  }
   content = data.template_file.user_data.rendered
   filename = "${path.module}/rendered/${random_pet.server_name.id}-user_data.cfg"
 }
