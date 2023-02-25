@@ -1,8 +1,12 @@
 terraform {
   required_providers {
-    proxmox = {
-      source = "bpg/proxmox"
-      version = "0.31.0"
+    google = {
+      source = "hashicorp/google"
+      version = "4.46.0"
+    }
+    digitalocean = {
+      source = "digitalocean/digitalocean"
+      version = "2.25.2"
     }
     tailscale = {
       source = "tailscale/tailscale"
@@ -15,6 +19,10 @@ terraform {
     template = {
       source = "hashicorp/template"
       version = "2.2.0"
+    }
+    local = {
+      source = "hashicorp/local"
+      version = "2.2.3"
     }
     vault = {
       source = "hashicorp/vault"

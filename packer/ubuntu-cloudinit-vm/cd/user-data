@@ -1,0 +1,24 @@
+#cloud-config
+autoinstall:
+  version: 1
+  refresh-installer:
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+  identity:
+    hostname: ubuntu-server
+    password: "$6$8YC24S7p.zrYf5pP$9vYDgcTmPj79gVvwoI6ShNLD39IYPgx54MyZAckH7VXQYLNTWNGdhaM80k5f4BQNTkYLAE0VhCq8PR5nujJUU/"
+    username: ubuntu
+  ssh:
+    allow-pw: false
+    install-server: true
+    authorized-keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ6z4PxtPlUS4aOvY8/XBJDCUr0juwIKVXrClcJkI6QH britt@Helios"
+  package_update: true
+  package_upgrade: true
+
+  packages:
+    - sudo
+    - qemu-guest-agent
+    - cloud-init
+    - nfs-common

@@ -1,0 +1,3 @@
+module "ts" {
+  source = "./tailscale"
+}

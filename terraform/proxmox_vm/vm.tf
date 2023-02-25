@@ -1,75 +1,75 @@
 resource "random_pet" "server_name" {
   length = 1
-  prefix = var.proxmox_node_name
-  keepers = {
-    nomad = sha256(data.template_file.nomad_config.rendered),
-    consul = sha256(data.template_file.consul_config.rendered),
-    vault = sha256(data.template_file.vault_config.rendered),
+  prefix = var.proxmox_node_prefix
+}
+
+module "ci-data" {
+  source = "../cloudinit"
+
+  hostname = random_pet.server_name.id
+  nomad_region = "cascadia"
+  nomad_provider = "virtual"
+  server = var.is_server
+}
+
+
+resource "proxmox_virtual_environment_file" "cloud_config" {
+  content_type = "snippets"
+  datastore_id = "local"
+  node_name    = "nuc"
+
+  source_raw {
+    data = module.ci-data.config
+    file_name = "${random_pet.server_name.id}.cloud-config.yaml"
   }
 }
 
-resource "random_integer" "vrrp_priority" {
-  min = 100
-  max = 500
-  keepers = {
-    vm = random_pet.server_name.id
-  }
-}
+resource "proxmox_virtual_environment_vm" "vm" {
+  name        = random_pet.server_name.id
+  description = "Managed by Terraform"
+  tags        = ["terraform", "ubuntu"]
+  node_name = "nuc"
 
-resource "local_file" "cloud_init_user_data_file" {
-  content = data.template_file.user_data.rendered
-  filename = "${path.module}/rendered/${random_pet.server_name.id}-user_data.cfg"
-}
-
-resource "null_resource" "cloud_init_config_files" {
-  connection {
-    type     = "ssh"
-    user     = "${var.proxmox_ssh_user}"
-    password = "${var.proxmox_ssh_password}"
-    host     = "${var.proxmox_host}"
+  agent {
+    enabled = true
   }
 
-  provisioner "file" {
-    source      = local_file.cloud_init_user_data_file.filename
-    destination = "/var/lib/vz/snippets/user_data_vm-${random_pet.server_name.id}.yml"
-  }
-}
-
-// Primary VM resource
-resource "proxmox_vm_qemu" "vm" {
-  depends_on = [
-    null_resource.cloud_init_config_files,
-  ]
-  lifecycle {
-    ignore_changes = [
-      disk,
-      desc,
-      clone,
-    ]
+  startup {
+    order      = "3"
+    up_delay   = "60"
+    down_delay = "60"
   }
 
-  name = "${random_pet.server_name.id}"
-  target_node = var.proxmox_node_name
-  clone = var.template_name
-  pool = ""
+  clone {
+    datastore_id = "local-lvm"
+    vm_id = var.template_name
+  }
 
-  agent = 1
+  cpu {
+    cores = var.cpu
+    type = "host"
+  }
 
-  cores = var.cpu
-  sockets = 1
-  memory = var.memory
+  memory {
+    dedicated = var.memory
+  }
 
-  network {
+  initialization {
+    ip_config {
+      ipv4 {
+        address = "dhcp"
+      }
+    }
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+  }
+
+  network_device {
     bridge = "vmbr0"
-    model = "virtio"
   }
 
-  disk {
-    type = "scsi"
-    storage = "local-lvm"
-    size = "100G"
+  operating_system {
+    type = "l26"
   }
 
-  cicustom                = "user=local:snippets/user_data_vm-${random_pet.server_name.id}.yml"
-  cloudinit_cdrom_storage = "local-lvm"
+  serial_device {}
 }

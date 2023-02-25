@@ -1,0 +1,94 @@
+api:
+  dashboard: true
+{{{ if env "meta.region" | eq "cascadia" }}}
+  insecure: true
+{{{ end }}}
+
+entryPoints:
+  traefik:
+    address: ':8081'
+  internal:
+    address: ':8082'
+  insecure:
+    address: ':80'
+    http:
+      redirections:
+        entryPoint:
+          to: "secure"
+          scheme: "https"
+  secure:
+    address: ':443'
+    forwardedHeaders:
+      trustedIPs:
+        - '192.168.1.0/24'
+        - '100.64.0.0/10'
+    http:
+      tls: {}
+
+  ssh:
+    address: ':2222'
+
+  {{{ if env "meta.region" | ne "cascadia" }}}
+  waypoint:
+    address: ':9701'
+  {{{ end }}}
+  valheim:
+    address: ':2456/udp'
+  valheim2:
+    address: ':2457/udp'
+  valheim3:
+    address: ':2458/udp'
+
+  empyrion0:
+    address: ':30000/udp'
+  empyrion1:
+    address: ':30001/udp'
+  empyrion2:
+    address: ':30002/udp'
+  empyrion3:
+    address: ':30003/udp'
+  empyrion4:
+    address: ':30004/udp'
+
+  synapse:
+    address: ':8448'
+
+providers:
+  providersThrottleDuration: 2s
+  file:
+    directory: '/local/config'
+    watch: true
+  consulCatalog:
+    endpoint:
+      address: 'http://consul.service.consul.demophoon.com:8500'
+    {{{ if env "meta.region" | ne "cascadia" }}}
+    defaultRule: "Host(`{{ normalize .Name }}.services.demophoon.com`)"
+    exposedByDefault: false
+    constraints: "!Tag(`internal=true`)"
+    {{{ else }}}
+    defaultRule: "Host(`{{ normalize .Name }}.services.demophoon.com`) || Host(`{{ normalize .Name }}.internal.demophoon.com`)"
+    exposedByDefault: true
+    {{{ end }}}
+
+log:
+  level: DEBUG
+
+http:
+  http:
+    routers:
+      api:
+        entrypoints:
+          - secure
+        rule: "Host(`dashboard.internal.demophoon.com`)"
+        service: api@internal
+  middlewares:
+    tailscaleOnly:
+      ipAllowList:
+        sourcerange:
+          - 127.0.0.1
+          - 100.64.0.0/10
+
+metrics:
+  prometheus:
+    entryPoint: internal
+    addRoutersLabels: true

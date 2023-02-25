@@ -1,9 +1,11 @@
+datacenter = "${region}"
 data_dir  = "/opt/nomad"
 
 bind_addr = "{{ GetInterfaceIP \"tailscale0\" }}"
 
 server {
-  enabled = true
+  enabled = ${is_server}
+  bootstrap_expect = 3
 }
 
 client {
@@ -121,7 +123,7 @@ client {
 consul {
   address = "127.0.0.1:8500"
   tags = ["ephemeral"]
-  server_auto_join = true
+  server_auto_join = ${is_server}
 }
 
 vault {
@@ -138,9 +140,6 @@ telemetry {
 plugin "docker" {
   config {
     pull_activity_timeout = "10m"
-    auth {
-      config = "/root/.docker/config.json"
-    }
     allow_privileged = true
     allow_caps = ["all"]
     volumes {
@@ -152,4 +151,10 @@ plugin "docker" {
 
 ui {
   enabled = true
+}
+
+tls {
+  http = true
+  cert_file = "/opt/nomad/certs/cert.pem"
+  key_file = "/opt/nomad/certs/priv.key"
 }
