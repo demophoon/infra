@@ -19,3 +19,4 @@ KbdInteractiveAuthentication no
 MaxAuthTries 3
 
 TrustedUserCAKeys /etc/ssh/ca.pem
+AllowUsers britt

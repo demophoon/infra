@@ -21,6 +21,10 @@ client {
     read_only = true
   }
 
+  host_volume "docker-sock" {
+    path = "/var/run/docker.sock"
+  }
+
   host_volume "gpool0" { path = "/mnt/nfs/gpool0" }
 
   # Home Assistant

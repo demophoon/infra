@@ -10,6 +10,12 @@ module "vm-proxmox" {
       cpu = 8
       memory = 16384
     }
+    proxmox-b = {
+      name = "proxmox"
+      host = "192.168.1.4"
+      cpu = 6
+      memory = 12288
+    }
     nuc = {
       name = "nuc"
       host = "192.168.1.35"
