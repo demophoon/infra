@@ -28,21 +28,19 @@ terraform {
       source = "hashicorp/nomad"
       version = "1.4.19"
     }
-    digitalocean = {
-      source = "digitalocean/digitalocean"
-      version = "2.25.2"
-    }
-    google = {
-      source = "hashicorp/google"
-      version = "4.46.0"
-    }
-    oci = {
-      source = "oracle/oci"
-      version = "4.105.0"
-    }
-    unifi = {
-      source = "paultyng/unifi"
-      version = "0.39.0"
-    }
+  }
+
+  backend "consul" {
+    address = "consul.service.consul.demophoon.com:8500"
+    scheme  = "http"
+    path    = "terraform/concert"
   }
 }
+
+provider "vault" {
+  address = "https://active.vault.service.consul.demophoon.com:8200"
+  tls_server_name = "active.vault.service.consul.demophoon.com"
+  skip_tls_verify = true
+  token = "hvs.CAESIJcVz5DNIa5LduqoaxPOJGzrcVM2GQzz8AerAGbFe4dbGh4KHGh2cy5JZkVRS2x2ekVaRnNpR0FNZUNzS1J0dFU"
+}
+

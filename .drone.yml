@@ -1,0 +1,45 @@
+kind: pipeline
+type: docker
+name: default
+
+workspace:
+  path: /drone/src
+
+steps:
+  - name: dns
+    image: tutum/dnsutils
+    commands:
+      - dig consul.service.consul.demophoon.com
+
+  - name: init
+    image: hashicorp/terraform:latest
+    commands:
+    - terraform -chdir="/drone/src/terraform" init
+  - name: plan
+    image: hashicorp/terraform:latest
+    environment:
+      TF_VAR_trs_address:
+        from_secret: "TF_VAR_trs_address"
+      TF_VAR_trs_scheme:
+        from_secret: "TF_VAR_trs_scheme"
+      TF_VAR_trs_path: "terraform/concert"
+
+      TAILSCALE_API_KEY:
+        from_secret: "TAILSCALE_API_KEY"
+      TAILSCALE_TAILNET:
+        from_secret: "TAILSCALE_TAILNET"
+      TF_VAR_tailscale_tailnet_name:
+        from_secret: "TF_VAR_tailscale_tailnet_name"
+
+      TF_VAR_proxmox_ssh_user:
+        from_secret: "TF_VAR_proxmox_ssh_user"
+      TF_VAR_proxmox_ssh_password:
+        from_secret: "TF_VAR_proxmox_ssh_password"
+      PM_USER:
+        from_secret: "PM_USER"
+      PM_PASS:
+        from_secret: "PM_PASS"
+      PM_API_URL:
+        from_secret: "PM_API_URL"
+    commands:
+      - terraform -chdir="/drone/src/terraform" plan
