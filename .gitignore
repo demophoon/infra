@@ -1,2 +1,3 @@
 *.tfstate
 terraform/proxmox_vm/rendered/*.cfg
+*.auto.pkrvars.hcl
