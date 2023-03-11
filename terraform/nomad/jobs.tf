@@ -13,3 +13,8 @@ resource "nomad_job" "certbot" {
   jobspec = file("${path.module}/jobspecs/certbot/certbot.hcl")
   hcl2 { enabled = true }
 }
+
+resource "nomad_job" "homeassistant" {
+  jobspec = file("${path.module}/jobspecs/homeassistant/homeassistant.hcl")
+  hcl2 { enabled = true }
+}
